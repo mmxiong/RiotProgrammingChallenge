@@ -1,4 +1,5 @@
 from constants import *
+from api_key import API_KEY
 import command_assembler
 import api_manager
 
