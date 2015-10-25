@@ -6,3 +6,6 @@ __pycache__/
 
 #ignore api_key.py to keep API key private
 api_key.py
+
+#ignore temp files like cache
+cache/

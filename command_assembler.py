@@ -26,7 +26,7 @@ class CommandAssembler:
 
     @staticmethod
     def assemble_get_champion_index(options):
-        return '%s/api/lol/%s/v1.2/champion%s' \
+        return '%s/api/lol/static-data/%s/v1.2/champion%s' \
                % (options['prefix'],
                   options['region'],
                   options['api_key'])
@@ -42,4 +42,4 @@ class CommandAssembler:
 switcher = {
     0: CommandAssembler.assemble_get_champion_index,
     1: CommandAssembler.assemble_get_champion_by_id
-    }
+}

@@ -1,7 +1,8 @@
+TODO: update documentation
 Documentation:
 
-api_manager:
-Contains ApiManager object. It takes a URL, and makes the call to the API, returning a JSON.
+data_manager:
+Contains DataManager object. It takes a URL, and makes the call to the API, returning a JSON.
 The URL should be created in the command_assembler file.
 
     Class: ApiManager
