@@ -1,0 +1,8 @@
+#ignore IDE files
+.idea/
+
+#ignore .pyc directory
+__pycache__/
+
+#ignore api_key.py to keep API key private
+api_key.py
