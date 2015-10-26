@@ -11,32 +11,34 @@ dictionary for the specific assembler method to use.
 class CommandAssembler:
     @staticmethod
     def assemble_command(command, prefix, api_key,
-                         region=None, champion_id=None):
+                         region=None, champion_id=None, data=None):
 
         # TODO: check if api_key is none, then return error
 
-        api_key_suffix = '?api_key=%s' % api_key
+        api_key_suffix = 'api_key=%s' % api_key
         # create dictionary with information
         options = dict(prefix=prefix,
                        region=region,
                        champion_id=champion_id,
-                       api_key=api_key_suffix)
+                       api_key=api_key_suffix,
+                       data=data)
 
         return switcher[command](options)
 
     @staticmethod
     def assemble_get_champion_index(options):
-        return '%s/api/lol/static-data/%s/v1.2/champion%s' \
+        return '%s/api/lol/static-data/%s/v1.2/champion/?%s' \
                % (options['prefix'],
                   options['region'],
                   options['api_key'])
 
     @staticmethod
     def assemble_get_champion_by_id(options):
-        return '%s/api/lol/static-data/%s/v1.2/champion/%s%s' \
+        return '%s/api/lol/static-data/%s/v1.2/champion/%s?champData=%s&%s' \
                % (options['prefix'],
                   options['region'],
                   options['champion_id'],
+                  options['data'],
                   options['api_key'])
 
 switcher = {
