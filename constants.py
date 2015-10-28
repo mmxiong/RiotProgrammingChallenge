@@ -5,7 +5,6 @@ from api_key import *
 # CONFIG OPTIONS
 PREFIX = 'https://na.api.pvp.net'
 REGION = 'na'
-CACHE = True
 CACHE_DIR = 'cache/'
 CHAMPION_INDEX_CACHE = 'champion_index_cache.txt'
 SPELL_CACHE_DIR = 'spells/'
