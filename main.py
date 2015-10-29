@@ -11,28 +11,27 @@ def main():
     # for now I'm assuming my cache is already done properly (it is)
     # just going to analyze Ahri (mostly damaging spells)
 
-    ahri = champion.Champion('Ahri')
-    # sanitized_tooltip = ahri.get_spells()[0]['sanitizedTooltip']
-    #
-    # some_string = ""
-    # while sanitized_tooltip is not '':
-    #     if sanitized_tooltip.startswith('{{'):
-    #         while not sanitized_tooltip.startswith('}}'):
-    #             some_string = some_string + sanitized_tooltip[0]
-    #             sanitized_tooltip = sanitized_tooltip[1:]
-    #         some_string = some_string + '}}'
-    #         sanitized_tooltip = sanitized_tooltip[4:]
-    #         if sanitized_tooltip.startswith('m'):
-    #             print("magic damage")
-    #         elif sanitized_tooltip.startswith('t'):
-    #             print("true damage")
-    #         print(some_string)
-    #         some_string = ""
-    #     sanitized_tooltip = sanitized_tooltip[1:]
+    # ahri = champion.Champion('Ahri')
 
+    # ahri_q = spell.Spell(ahri.champion_spells[0])
+    # ahri_q.print_info()
 
-    ahri_q = spell.Spell(ahri.champion_spells[0])
+    # ahri_w = spell.Spell(ahri.champion_spells[1])
+    # ahri_w.print_info()
 
+    # ahri_e = spell.Spell(ahri.champion_spells[2])
+    # ahri_e.print_info()
+
+    aatrox = champion.Champion('Aatrox')
+
+    # aatrox_q = spell.Spell(aatrox.champion_spells[0])
+    # aatrox_q.print_info()
+
+    # aatrox_w = spell.Spell(aatrox.champion_spells[1])
+    # aatrox_w.print_info()
+
+    aatrox_e = spell.Spell(aatrox.champion_spells[2])
+    aatrox_e.print_info()
 
 # TODO: find a home for this function
 def clean_up_cache():
