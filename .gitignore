@@ -9,3 +9,4 @@ api_key.py
 
 #ignore temp files like cache
 cache/
+log.txt

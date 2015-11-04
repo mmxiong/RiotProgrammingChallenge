@@ -1,41 +1,71 @@
 from constants import *
+from calculations import *
 import setup
-import shutil
 import champion
 import spell
 
 __author__ = 'Michael'
 
+log_file = 'log.txt'
 
 def main():
-    # for now I'm assuming my cache is already done properly (it is)
-    # just going to analyze Ahri (mostly damaging spells)
 
-    # ahri = champion.Champion('Ahri')
+    log = open(log_file, 'w')
 
-    # ahri_q = spell.Spell(ahri.champion_spells[0])
-    # ahri_q.print_info()
+    ap = 0
+    ad = 0
+    bonus_ad = 0
+    cdr = 0
 
-    # ahri_w = spell.Spell(ahri.champion_spells[1])
-    # ahri_w.print_info()
 
-    # ahri_e = spell.Spell(ahri.champion_spells[2])
-    # ahri_e.print_info()
+    champion_index = setup.get_champion_index()
+    champion_index_list = []
+    for entry in champion_index:
+        champion_index_list.append(entry)
 
-    aatrox = champion.Champion('Aatrox')
+    champion_index_list.sort()
 
-    # aatrox_q = spell.Spell(aatrox.champion_spells[0])
-    # aatrox_q.print_info()
+    efficiencies = []
 
-    # aatrox_w = spell.Spell(aatrox.champion_spells[1])
-    # aatrox_w.print_info()
+    for entry in champion_index_list:
 
-    aatrox_e = spell.Spell(aatrox.champion_spells[2])
-    aatrox_e.print_info()
+        print(entry)
+        # if entry in ['Leona', 'Heimerdinger', 'MissFortune', 'Gnar']:
+        #     continue
 
-# TODO: find a home for this function
-def clean_up_cache():
-    shutil.rmtree(CACHE_DIR, ignore_errors=True)
+        champ = champion.Champion(entry)
+
+        for x in range(3):
+            champion_spell = spell.Spell(champ.champion_spells[x])
+
+            # get stats from spell object
+            base = 100 # champion_spell.damage
+            cost = champion_spell.cost
+            cost_type = champion_spell.cost_type
+            ratios = []# champion_spell.scaling
+            scaling_stats = [] # champion_spell.scaling_stat
+            cooldown = 10 # champion_spell.cooldown * (1 - cdr)
+
+            # convert stats to gold for comparison
+            total_damage = calculate_damage(base, ratios, scaling_stats, ap, ad, bonus_ad)
+            total_damage_gold = convert_health_to_gold(total_damage)
+
+            if cost_type is 'Mana':
+                cost_gold = convert_mana_to_gold(cost)
+            elif cost_type is 'Health':
+                cost_gold = convert_health_to_gold(cost)
+            else:
+                cost_gold = 0
+                log.write("%s's spell: %s has unknown cost: %s" % (entry, champion_spell.key, cost_type))
+
+            efficiency = calculate_efficiency(total_damage_gold, cost_gold, cooldown)
+
+            efficiencies.append(str(efficiency ) + str(champion_spell.key))
+
+    efficiencies.sort()
+    print(efficiencies)
+
+    log.close()
 
 if __name__ == '__main__':
     main()
