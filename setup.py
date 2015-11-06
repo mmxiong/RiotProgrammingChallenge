@@ -11,6 +11,17 @@ __author__ = 'Michael'
 
 """
 Library for setting up the cached files for future use.
+cache_champion_index():
+    This function makes and API call to download the champion index (list of champions) to local cache files
+
+cache_champion_spells():
+    This function makes man API calls to download champion spells for all champions to local cache files
+
+get_champion_index():
+    This function returns the champion index from local cache files
+
+get_champion_spells(key):
+    This function takes in a champion key and returns the champion's spells as a JSON from local cache files
 """
 
 

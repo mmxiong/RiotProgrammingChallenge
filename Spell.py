@@ -1,8 +1,8 @@
 __author__ = 'Michael'
 
 """
-This class represents a spell, and has a parsing method (set_attributes) that sets
-relevant variables.
+This class represents a spell, and has a parsing method (set_damage) that sets
+damage, ratios, and scaling stats. Other values are set in constructor.
 """
 
 class Spell:
@@ -10,17 +10,9 @@ class Spell:
 
         self.json = spell_json
         self.key = spell_json['key']
-
-        # these will be set w/ set damage
-        self.damage = []  # get damage
-
-        # not yet useful, just looking at damages
-        self.scaling = []  # get scaling
-        self.scaling_stat = []  # get scaling stat
-
-
-
-
+        self.damage = []
+        self.ratios = []
+        self.scaling_stats = []
         self.cost_type = spell_json['costType']
         self.cost = spell_json['cost'][-1]
         self.cooldown = spell_json['cooldown'][-1]
@@ -28,100 +20,76 @@ class Spell:
         self.set_damage()
 
     def set_damage(self):
-        sanitized_tooltip = self.json['sanitizedTooltip'].split()
+        # if vars key is not in the json, then the spell must not scale on ap/ad
+        # we ignore these, as their efficiencies may depend on other factors (eg. Mundo's Q)
+        if 'vars' not in self.json or 'effect' not in self.json:
+            # still need to set damage to a number (0)
+            self.damage = sum(self.damage)
+            return
 
-        tooltip_index = 0
+        vars = self.json['vars']
+        # scaling keys will hold a1, a2, f1, etc.
+        # this allows us to parse the sanitizedTooltip for relevant base damages
+        scaling_keys = []
+        # if we find a key in sanitizedTooltip, we want to add the relevant ratio and stat to the self.ratios and
+        # self.scaling_stats list
+        # we don't add them immediatley when we find them because of cases like Ahri's Q (same base, same scaling, 2 ways)
+        key_to_scaling = {}
 
-        while tooltip_index < len(sanitized_tooltip):
-            if sanitized_tooltip[tooltip_index].lower().startswith(('deal', 'take', 'taking')):
-                #then we need to do some parsing for base damages
-                damage = ""
-                tooltip_index += 1
-                should_append = False
+        # goes through the vars array and pulls out each scaling factor of the spell
+        # afterwards, scaling keys contains a bunch of scaling variables (a1, f2, etc.)
+        for x in range(len(vars)):
+            ratio = vars[x]['coeff']
+            scaling_stat = vars[x]['link']
+            key = vars[x]['key']
 
-                while tooltip_index < len(sanitized_tooltip) and not sanitized_tooltip[tooltip_index].startswith('}}'):
-                    if self.is_damage(sanitized_tooltip[tooltip_index]):
-                        damage = sanitized_tooltip[tooltip_index]
-                        should_append = True
-                    tooltip_index += 1
+            if ratio is None or key is None or scaling_stat not in {'bonusattackdamage', 'attackdamage', 'spelldamage'}:
+                continue
 
-                    if tooltip_index < len(sanitized_tooltip) and sanitized_tooltip[tooltip_index].endswith('%'):
-                        should_append = False
-
-                tooltip_index += 1
-                if should_append:
-                    self.damage.append(damage)
-            tooltip_index += 1
-
-
-    def is_damage(self, some_str):
-        return len(some_str) is 2 and some_str.startswith(('e')) and some_str[1].isnumeric()
-
-    def print_info(self):
-        # print("key: %s" % self.key)
-        print("damage: %s" % self.damage)
-        # print("scaling: %s" % self.scaling)
-        # print("scaling stat: %s" % self.scaling_stat)
-        # print("damage type: %s" % self.damage_type)
-        # print("cost type: %s" % self.cost_type)
-        # print("cost: %s" % self.cost)
-        # print("cooldown: %s" % self.cooldown)
-
-
-        """
-        self.key = self.json['key']
+            key_to_scaling[key] = (scaling_stat, ratio)
+            scaling_keys.append(key)
 
         sanitized_tooltip = self.json['sanitizedTooltip'].split()
 
-        damage_var = []
-        scaling_var = []
+        # holds damage keys (eg. e1, e2, etc.)
+        damage_set = set()
 
+        # parse sanitized tooltip for each scaling_key, and find the previous effect variable (e1, e2, etc.)
         for x in range(len(sanitized_tooltip)):
+            if sanitized_tooltip[x] in scaling_keys:
+                # if there is a closing paren, then there was another scaling variable before this one
+                # happens in cases of scaling off both AD and AP
+                if ')' in sanitized_tooltip[x-2] and self.is_damage(sanitized_tooltip[x-6]):
+                    damage_set.add(x-6)
+                # otherwise, this is the scaling key directly following the base damage 3 indexes back
+                elif self.is_damage(sanitized_tooltip[x-3]):
+                    damage_set.add(x-3)
+                self.scaling_stats.append(key_to_scaling[sanitized_tooltip[x]][0])
+                self.ratios.append(key_to_scaling[sanitized_tooltip[x]][1][-1])
 
-            if sanitized_tooltip[x].lower().startswith(('magic', 'physical', 'true'))\
-                    and sanitized_tooltip[x + 1].lower().startswith('damage'):
-                y = x
-                self.damage_type.append(sanitized_tooltip[x])
+        # once damage_set is populated, we replace those keys with actual damage values in the self.damage list
+        for index in damage_set:
+            # damage key should be of form e* where * is some int
+            damage_key = sanitized_tooltip[index]
+            # effects array holds damages
+            effects = self.json['effect']
+            damage_array = effects[int(damage_key[1])]
+            # we add in the last element (base damage at max level)
+            self.damage.append(damage_array[len(damage_array) - 1])
 
-                in_parens = False
+        self.damage = sum(self.damage)
 
-                while not sanitized_tooltip[y].startswith('{{'):
-                    temp = sanitized_tooltip[y]
-                    if ')' in sanitized_tooltip[y]:
-                        in_parens = True
+    # simply returns whether or not a specific string is of the form e*
+    # if it is, it represents a variable representing a base damage value
+    def is_damage(self, some_str):
+        return len(some_str) is 2 and some_str.startswith('e') and some_str[1].isnumeric()
 
-                    if sanitized_tooltip[y].startswith(('a', 'f')) and 'additional' not in sanitized_tooltip[y]:
-                        scaling_var.append(sanitized_tooltip[y])
-
-                    if sanitized_tooltip[y].startswith('e'):
-                        damage_var.append(sanitized_tooltip[y][1])
-
-                    if '(' in sanitized_tooltip[y] and not in_parens:
-                        break
-
-
-                    y -= 1
-
-        for each in damage_var:
-            self.damage.append(self.json['effect'][int(each)])
-
-        for ratio in scaling_var:
-            try:
-                vars = self.json['vars']
-
-                for var in vars:
-                    if var['key'].startswith(ratio):
-                        self.scaling.append(var['coeff'])
-                        self.scaling_stat.append(var['link'])
-            except KeyError:
-                self.scaling.append(0)
-                self.scaling_stat
-
-
-
-
-        self.cost_type = self.json['costType']
-        self.cost = self.json['cost']
-        self.cooldown = self.json['cooldown']
-        self.key = self.json['key']
-        """
+    # for debugging purposes
+    def print_info(self):
+        print("key: %s" % self.key)
+        print("damage: %s" % self.damage)
+        print("scaling: %s" % self.ratios)
+        print("scaling stat: %s" % self.scaling_stats)
+        print("cost type: %s" % self.cost_type)
+        print("cost: %s" % self.cost)
+        print("cooldown: %s" % self.cooldown)

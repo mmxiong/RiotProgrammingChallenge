@@ -1,32 +1,50 @@
 __author__ = 'Michael'
 
+"""
+This class contains various methods for doing calculations relevant to finding the most efficient spell.
+"""
 
-def calculate_damage(base, ratios, scaling_stats, ap, ad, bonus_ad):
-    if len(scaling_stats) is not len(ratios):
-        return 0
+class Calculations():
 
-    total = base
+    # calculates total damage from a given base, ratios, and stats
+    @staticmethod
+    def calculate_damage(base, ratios, scaling_stats, ap, ad, bonus_ad):
+        total = base
 
-    for x in range(len(scaling_stats)):
-        if scaling_stats[x] is 'spelldamage':
-            total += ratios[x] * ap
-        elif scaling_stats[x] is 'attackdamage':
-            total += ratios[x] * ad
-        elif scaling_stats[x] is 'bonusattackdamage':
-            total += ratios[x] * bonus_ad
+        for x in range(len(scaling_stats)):
+            if 'spelldamage' in scaling_stats[x]:
+                total += ratios[x] * ap
+            elif 'attackdamage' in scaling_stats[x]:
+                total += ratios[x] * ad
+            elif 'bonusattackdamage' in scaling_stats[x]:
+                total += ratios[x] * bonus_ad
 
-    return total
-
-# NOTE: I thought about using health and mana potion restore/cost ratios, but S6 sees the removal of mana pots, and a
-# change in the cost of health pots
-
-def convert_health_to_gold(health):
-    return health * 2.67
+        return total
 
 
-def convert_mana_to_gold(mana):
-    return mana * 2
+    # converts health values to equivalent gold value
+    # 2.67 is the ratio of gold to health provided by a ruby crystal
+    # health potion arguably a better comparison, but there is no mana equivlanet in S6 (mana potions removed)
+    # for the purposes of calculation, this results in a larger resulting "efficiency" value
+    # however, relative efficiencies remain largely the same
+    @staticmethod
+    def convert_health_to_gold(health):
+        return health * 2.67
 
 
-def calculate_efficiency(gain, cost, cooldown):
-    return (gain - cost)/cooldown
+    # same as above function for mana
+    # uses 2:1 ratio of mana to gold provided by mana crystal
+    @staticmethod
+    def convert_mana_to_gold(mana):
+        return mana * 2
+
+
+    # uses formula:
+    # [(gain in gold) - (cost in gold)]/cooldown
+    # approximates gold per second efficiency of a spell
+    @staticmethod
+    def calculate_efficiency(gain, cost, cooldown):
+        try:
+            return (gain - cost) / cooldown
+        except ZeroDivisionError:
+            return gain - cost
