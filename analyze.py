@@ -2,6 +2,7 @@ import setup
 import spell
 from constants import *
 from calculations import *
+import os.path
 
 __author__ = 'Michael'
 
@@ -38,6 +39,15 @@ def main():
     ap = int(ap)
     ad = int(ad)
     bonus_ad = int(bonus_ad)
+
+    if not os.path.isdir(CACHE_DIR):
+        print("Caching champion index for future use...")
+        setup.cache_champion_index()
+
+    if not os.path.isdir("%s/%s" % (CACHE_DIR, SPELL_CACHE_DIR)):
+        print("Caching champion spells for future use...")
+        setup.cache_champion_spells()
+
 
     # get champion index in order to iterate over every champion
     champion_index = setup.get_champion_index()
@@ -92,7 +102,7 @@ def main():
                     or 'Heat' in cost_type\
                     or 'Passive' in cost_type\
                     or 'Builds1Ferocity' in cost_type:
-                pass
+                cost_gold = 0
             else:
                 cost_gold = 0
 
@@ -106,16 +116,16 @@ def main():
                 most_efficient_spell_number = x + 1
 
     if most_efficient_spell_number is 1:
-        suffix = 'st'
+        spell_key = 'Q'
     elif most_efficient_spell_number is 2:
-        suffix = 'nd'
+        spell_key = 'W'
     elif most_efficient_spell_number is 3:
-        suffix = 'rd'
+        spell_key = 'E'
     else:
-        suffix = 'th'
+        spell_key = 'R'
 
-    print("The most efficient spell with given inputs is: %s's %i%s spell with key: %s"
-          % (most_efficient_spell_champion, most_efficient_spell_number, suffix, most_efficient_spell_key))
+    print("The most efficient spell with given inputs is: %s's %s with key: %s"
+          % (most_efficient_spell_champion, spell_key, most_efficient_spell_key))
 
 if __name__ == '__main__':
     main()

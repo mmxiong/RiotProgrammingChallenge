@@ -1,9 +1,17 @@
 Riot Programming Challenge
 
+To run:
+Run analyze.py
+To clean up:
+Run cleanup.py
+
 This program calculates the most efficient spell in League of Legends given different amounts of AP, AD,
 bonus AD, and CDR. It does so by making API calls to the Riot API in order to get all data on the 127
-champions, and their spells. Then, it calculates efficiency by converting gains and costs of the spell to gold.
-Then, it divides the resulting value by the cooldown.
+champions, and their spells. This data is cached for subsequent executions of the program, and can be
+cleaned by running the cleanup.py file.
+
+The program calculates efficiency by converting gains and costs of the spell to gold and then dividing
+the resulting value by the cooldown.
 
 Efficiency = [(gain in gold) - (cost in gold)]/cooldown
 
@@ -35,7 +43,6 @@ extremely low cooldowns that skewed the calculations. There was not an easy way 
 generation times to be used as replacement cooldowns. For this reason, spells like these were skipped. A full
 list of spells that were skipped can be found in the constants.py file. The ignore_spells set contains the
 keys of the spells to be skipped.
-
 
 
 Documentation:
