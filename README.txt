@@ -1,5 +1,7 @@
 Riot Programming Challenge
 
+Language: Python 3
+
 To run:
 Run analyze.py
 To clean up:
